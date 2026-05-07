@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leer Solar Cameras — Meta Weekly Report | Apr 30 – May 6, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --solar: #f5a623;
+    --solar-dim: #ffcf72;
+    --bg: #080a10;
+    --bg2: #0f1220;
+    --bg3: #161b2e;
+    --card: #111624;
+    --border: rgba(245,166,35,0.18);
+    --text: #e8ecf4;
+    --muted: #6b7694;
+    --green: #3dffa0;
+    --red: #ff4d6d;
+    --blue: #4da6ff;
+    --purple: #b67fff;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  #cursor { position: fixed; width: 14px; height: 14px; border-radius: 50%; background: var(--solar); pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .15s, height .15s, opacity .15s; mix-blend-mode: screen; }
+  #cursor-ring { position: fixed; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid rgba(245,166,35,0.5); pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: transform .08s, width .2s, height .2s; }
+  body:has(a:hover) #cursor, body:has(button:hover) #cursor { width: 22px; height: 22px; }
+  body:has(a:hover) #cursor-ring, body:has(button:hover) #cursor-ring { width: 60px; height: 60px; }
+
+  /* PARTICLE CANVAS */
+  #particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: .35; }
+
+  /* LAYOUT */
+  .wrap { position: relative; z-index: 1; max-width: 1320px; margin: 0 auto; padding: 0 32px; }
+
+  /* HEADER */
+  header {
+    position: relative;
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 560px; height: 560px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,166,35,.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .logo-tag { font-family: var(--font-head); font-size: 11px; letter-spacing: 4px; color: var(--solar); text-transform: uppercase; margin-bottom: 18px; }
+  h1 { font-family: var(--font-head); font-size: clamp(36px, 5vw, 64px); font-weight: 800; line-height: 1.05; letter-spacing: -1px; }
+  h1 span { color: var(--solar); }
+  .meta-line { display: flex; gap: 32px; margin-top: 22px; flex-wrap: wrap; }
+  .meta-chip { background: var(--bg3); border: 1px solid var(--border); border-radius: 30px; padding: 6px 16px; font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+  .meta-chip b { color: var(--solar); }
+
+  /* NAV PILLS */
+  nav { display: flex; gap: 10px; margin: 36px 0 0; flex-wrap: wrap; }
+  nav a {
+    font-family: var(--font-head); font-size: 12px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
+    padding: 8px 20px; border-radius: 30px;
+    border: 1px solid var(--border); color: var(--muted);
+    transition: all .2s;
+  }
+  nav a:hover, nav a.active { background: var(--solar); color: #000; border-color: var(--solar); }
+
+  /* SECTION */
+  section { padding: 72px 0 0; }
+  .section-label { font-family: var(--font-head); font-size: 10px; letter-spacing: 4px; color: var(--solar); text-transform: uppercase; margin-bottom: 12px; }
+  h2 { font-family: var(--font-head); font-size: clamp(22px, 3vw, 34px); font-weight: 700; margin-bottom: 32px; }
+  h3 { font-family: var(--font-head); font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 48px; }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 22px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--solar), transparent);
+    opacity: 0; transition: opacity .3s;
+  }
+  .kpi-card:hover { transform: translateY(-4px); border-color: rgba(245,166,35,.4); box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+  .kpi-card:hover::before { opacity: 1; }
+  .kpi-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+  .kpi-value { font-family: var(--font-head); font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+  .kpi-delta { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+  .up { color: var(--green); }
+  .down { color: var(--red); }
+  .neutral { color: var(--muted); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .kpi-bar { height: 3px; background: var(--bg3); border-radius: 3px; margin-top: 14px; overflow: hidden; }
+  .kpi-bar-fill { height: 100%; border-radius: 3px; background: var(--solar); transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+
+  /* INSIGHT CARDS */
+  .insight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 48px; }
+  .insight-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 24px 22px; position: relative;
+  }
+  .insight-icon { font-size: 22px; margin-bottom: 12px; }
+  .insight-card p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .insight-card strong { color: var(--text); }
+
+  /* CHARTS */
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 48px; }
+  @media(max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px; position: relative; overflow: hidden;
+  }
+  .chart-box.wide { grid-column: 1 / -1; }
+  .chart-title { font-family: var(--font-head); font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--solar); margin-bottom: 20px; }
+  canvas { max-height: 280px; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin-bottom: 48px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th {
+    background: var(--bg3); color: var(--solar); font-family: var(--font-head); font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase; padding: 14px 18px; text-align: left;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid rgba(255,255,255,.04); transition: background .15s; }
+  tbody tr:hover { background: rgba(245,166,35,.04); }
+  tbody td { padding: 13px 18px; color: var(--text); white-space: nowrap; }
+  tbody td.muted { color: var(--muted); }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; letter-spacing: 1px; font-weight: 700; }
+  .badge-green { background: rgba(61,255,160,.12); color: var(--green); }
+  .badge-red { background: rgba(255,77,109,.12); color: var(--red); }
+  .badge-yellow { background: rgba(245,166,35,.12); color: var(--solar); }
+  .badge-blue { background: rgba(77,166,255,.12); color: var(--blue); }
+
+  /* PLATFORM SPLIT */
+  .platform-split { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 48px; }
+  @media(max-width:768px) { .platform-split { grid-template-columns: 1fr; } }
+  .platform-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .plat-header { display: flex; align-items: center; gap: 14px; }
+  .plat-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .plat-icon.fb { background: rgba(24,119,242,.2); }
+  .plat-icon.ig { background: rgba(214,41,118,.2); }
+  .plat-name { font-family: var(--font-head); font-size: 18px; font-weight: 700; }
+  .plat-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .plat-metric { background: var(--bg3); border-radius: 10px; padding: 12px 14px; }
+  .plat-metric-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+  .plat-metric-val { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-top: 4px; }
+
+  /* 3D RADAR */
+  .radar-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 48px; }
+
+  /* PLACEMENT BARS */
+  .placement-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 48px; }
+  .placement-row { display: grid; grid-template-columns: 180px 1fr 80px; align-items: center; gap: 18px; }
+  .placement-name { font-size: 12px; color: var(--muted); text-align: right; white-space: nowrap; }
+  .placement-bar-bg { background: var(--bg3); border-radius: 6px; height: 10px; overflow: hidden; }
+  .placement-bar-fill { height: 100%; border-radius: 6px; transition: width 1.5s cubic-bezier(.4,0,.2,1); }
+  .placement-val { font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--solar); }
+
+  /* AD PERFORMANCE TABLE */
+  .ad-perf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: gap; }
+  .filter-tabs { display: flex; gap: 8px; }
+  .filter-tab { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px; font-size: 11px; cursor: pointer; color: var(--muted); transition: all .2s; }
+  .filter-tab.active, .filter-tab:hover { background: var(--solar); color: #000; border-color: var(--solar); }
+
+  /* SCROLL ANIMATION */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s, transform .7s; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* FOOTER */
+  footer { padding: 60px 0 40px; border-top: 1px solid var(--border); margin-top: 80px; text-align: center; }
+  footer p { font-size: 11px; color: var(--muted); line-height: 1.8; }
+
+  /* 3D TILT */
+  .tilt { transform-style: preserve-3d; }
+
+  /* GLOW PULSE */
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(245,166,35,.1); }
+    50% { box-shadow: 0 0 40px rgba(245,166,35,.25); }
+  }
+  .kpi-card:nth-child(1) { animation: pulse-glow 3s infinite; }
+
+  /* TOOLTIP */
+  .tooltip-trigger { position: relative; }
+  .tooltip-trigger:hover .tooltip-box { opacity: 1; pointer-events: all; transform: translateY(-6px); }
+  .tooltip-box {
+    position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%) translateY(0);
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 14px; font-size: 11px; color: var(--text); width: 220px; text-align: center;
+    opacity: 0; pointer-events: none; transition: all .2s; z-index: 100; white-space: normal;
+  }
+
+  /* AD SET PROGRESS */
+  .ad-set-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; margin-bottom: 48px; }
+  .ad-set-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 20px;
+    position: relative; overflow: hidden;
+  }
+  .ad-set-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--solar), transparent); }
+  .ad-set-name { font-family: var(--font-head); font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+  .ad-set-stat { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.04); font-size: 11px; }
+  .ad-set-stat:last-child { border-bottom: none; }
+  .ad-set-stat-label { color: var(--muted); }
+  .ad-set-stat-val { font-family: var(--font-head); font-weight: 700; }
+
+  /* HERO PULSE RING */
+  .pulse-ring {
+    position: absolute; top: 50%; right: 0; transform: translateY(-50%);
+    width: 300px; height: 300px; border-radius: 50%;
+    border: 1px solid rgba(245,166,35,.15);
+    animation: expand 3s infinite ease-out;
+    pointer-events: none;
+  }
+  .pulse-ring:nth-child(2) { animation-delay: 1s; }
+  .pulse-ring:nth-child(3) { animation-delay: 2s; }
+  @keyframes expand { 0% { transform: translateY(-50%) scale(.6); opacity: .6; } 100% { transform: translateY(-50%) scale(1.4); opacity: 0; } }
+
+  /* WINNER / LOSER */
+  .winner-loser { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 48px; }
+  @media(max-width: 700px) { .winner-loser { grid-template-columns: 1fr; } }
+  .wl-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 26px 22px; }
+  .wl-card.winner { border-color: rgba(61,255,160,.25); }
+  .wl-card.loser { border-color: rgba(255,77,109,.2); }
+  .wl-tag { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+  .wl-card.winner .wl-tag { color: var(--green); }
+  .wl-card.loser .wl-tag { color: var(--red); }
+  .wl-ad { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .wl-set { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+  .wl-stat { display: flex; gap: 8px; flex-wrap: wrap; }
+  .wl-chip { padding: 5px 12px; border-radius: 20px; font-size: 11px; background: var(--bg3); }
+
+  /* RECOMMENDATION */
+  .reco-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 48px; }
+  .reco-item { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--solar); border-radius: 0 14px 14px 0; padding: 20px 22px; display: flex; gap: 18px; align-items: flex-start; }
+  .reco-num { font-family: var(--font-head); font-size: 28px; font-weight: 800; color: var(--solar); opacity: .3; line-height: 1; min-width: 36px; }
+  .reco-body p { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.7; }
+  .reco-body strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Particle Canvas -->
+<canvas id="particles"></canvas>
+
+<div class="wrap">
+  <!-- HEADER -->
+  <header id="overview">
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring"></div>
+    <div class="logo-tag">Leer Solar Cameras &nbsp;·&nbsp; Meta Ads Report</div>
+    <h1>Weekly Performance<br><span>Apr 30 – May 6, 2026</span></h1>
+    <div class="meta-line">
+      <div class="meta-chip">Account: <b>Leer Solar Cameras Ad Account 1</b></div>
+      <div class="meta-chip">Currency: <b>AUD</b></div>
+      <div class="meta-chip">Platforms: <b>Facebook · Instagram</b></div>
+      <div class="meta-chip">Objective: <b>Conversions / Sales</b></div>
+    </div>
+    <nav>
+      <a href="#overview" class="active">Overview</a>
+      <a href="#performance">Performance</a>
+      <a href="#creatives">Creatives</a>
+      <a href="#placements">Placements</a>
+      <a href="#adsets">Ad Sets</a>
+      <a href="#recommendations">Insights</a>
+    </nav>
+  </header>
+
+  <!-- KPI SECTION -->
+  <section id="performance">
+    <div class="section-label">Key Performance Indicators</div>
+    <h2>This Week at a Glance</h2>
+
+    <div class="kpi-grid reveal">
+      <div class="kpi-card tooltip-trigger" data-tilt>
+        <div class="tooltip-box">Total unique users reached this week</div>
+        <div class="kpi-label">Total Reach</div>
+        <div class="kpi-value" style="color:var(--solar)">36,935</div>
+        <div class="kpi-delta up">▲ +3,261 &nbsp;(+9.7%)</div>
+        <div class="kpi-sub">vs 33,674 prior week</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:72%"></div></div>
+      </div>
+
+      <div class="kpi-card tooltip-trigger" data-tilt>
+        <div class="tooltip-box">Total ad impressions served</div>
+        <div class="kpi-label">Impressions</div>
+        <div class="kpi-value" style="color:var(--blue)">115,484</div>
+        <div class="kpi-delta up">▲ +17,327 &nbsp;(+17.7%)</div>
+        <div class="kpi-sub">vs 98,157 prior week</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:85%; background:var(--blue)"></div></div>
+      </div>
+
+      <div class="kpi-card tooltip-trigger" data-tilt>
+        <div class="tooltip-box">Total ad spend this week</div>
+        <div class="kpi-label">Amount Spent</div>
+        <div class="kpi-value" style="color:var(--red)">$2,337</div>
+        <div class="kpi-delta down">▼ −$89.32 &nbsp;(−3.7%)</div>
+        <div class="kpi-sub">vs $2,426.56 prior week</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:55%; background:var(--red)"></div></div>
+      </div>
+
+      <div class="kpi-card tooltip-trigger" data-tilt>
+        <div class="tooltip-box">Total link clicks across all ads</div>
+        <div class="kpi-label">Link Clicks</div>
+        <div class="kpi-value" style="color:var(--purple)">1,583</div>
+        <div class="kpi-delta up">▲ +239 &nbsp;(+17.8%)</div>
+        <div class="kpi-sub">vs 1,344 prior week</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:68%; background:var(--purple)"></div></div>
+      </div>
+
+      <div class="kpi-card tooltip-trigger" data-tilt>
+        <div class="tooltip-box">Total purchase conversions tracked</div>
+        <div class="kpi-label">Purchases</div>
+        <div class="kpi-value" style="color:var(--green)">9</div>
+        <div class="kpi-delta down">▼ −1 &nbsp;(−10%)</div>
+        <div class="kpi-sub">vs 10 prior week</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:45%; background:var(--green)"></div></div>
+      </div>
+
+      <div class="kpi-card tooltip-trigger" data-tilt>
+        <div class="tooltip-box">Average cost per purchase conversion</div>
+        <div class="kpi-label">Cost per Purchase</div>
+        <div class="kpi-value" style="color:var(--solar-dim)">$259.69</div>
+        <div class="kpi-delta down">▲ +$17.04 &nbsp;(+7%)</div>
+        <div class="kpi-sub">vs $242.66 prior week</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:60%; background:var(--solar-dim)"></div></div>
+      </div>
+
+      <div class="kpi-card tooltip-trigger" data-tilt>
+        <div class="tooltip-box">Total revenue value from conversions</div>
+        <div class="kpi-label">Conv. Value</div>
+        <div class="kpi-value" style="color:var(--green)">$12,572</div>
+        <div class="kpi-delta up">▲ +$527 &nbsp;(+4.4%)</div>
+        <div class="kpi-sub">vs $12,045 prior week</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:78%; background:var(--green)"></div></div>
+      </div>
+
+      <div class="kpi-card tooltip-trigger" data-tilt>
+        <div class="tooltip-box">Average frequency — times each user saw your ads</div>
+        <div class="kpi-label">Frequency</div>
+        <div class="kpi-value" style="color:var(--muted)">3.13</div>
+        <div class="kpi-delta up">▲ +0.21 &nbsp;(+7.3%)</div>
+        <div class="kpi-sub">vs 2.91 prior week</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:62%; background:var(--muted)"></div></div>
+      </div>
+
+      <div class="kpi-card tooltip-trigger" data-tilt>
+        <div class="tooltip-box">Click-through rate across all ads</div>
+        <div class="kpi-label">CTR (All)</div>
+        <div class="kpi-value" style="color:var(--blue)">1.86%</div>
+        <div class="kpi-delta down">▼ −0.04pp &nbsp;(−2.3%)</div>
+        <div class="kpi-sub">vs 1.90% prior week</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:50%; background:var(--blue)"></div></div>
+      </div>
+
+      <div class="kpi-card tooltip-trigger" data-tilt>
+        <div class="tooltip-box">Cost per 1,000 impressions</div>
+        <div class="kpi-label">CPM</div>
+        <div class="kpi-value" style="color:var(--solar)">$20.24</div>
+        <div class="kpi-delta down">▼ −$4.48 &nbsp;(−18.1%)</div>
+        <div class="kpi-sub">vs $24.72 prior week — <b>improved</b></div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:45%"></div></div>
+      </div>
+    </div>
+
+    <!-- CHART ROW -->
+    <div class="chart-grid reveal">
+      <div class="chart-box wide">
+        <div class="chart-title">Spend vs Conversion Value — Week-on-Week</div>
+        <canvas id="spendChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">CTR Distribution by Ad Set</div>
+        <canvas id="ctrChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">CPM Comparison by Ad Set</div>
+        <canvas id="cpmChart"></canvas>
+      </div>
+    </div>
+
+    <!-- WINNER / LOSER -->
+    <div class="section-label">Creative Verdict</div>
+    <h2>Top Performer & Biggest Drop</h2>
+    <div class="winner-loser reveal">
+      <div class="wl-card winner">
+        <div class="wl-tag">🏆 Top Performer</div>
+        <div class="wl-ad">Pre Black Friday (Summer Sale)</div>
+        <div class="wl-set">New Sales Ad Set</div>
+        <div class="wl-stat">
+          <span class="wl-chip">$3,086 conv. value</span>
+          <span class="wl-chip">1 purchase</span>
+          <span class="wl-chip">$13.54 CPR</span>
+          <span class="wl-chip" style="background:rgba(61,255,160,.1); color:var(--green)">Reach +198%</span>
+        </div>
+      </div>
+      <div class="wl-card loser">
+        <div class="wl-tag">⚠️ Needs Attention</div>
+        <div class="wl-ad">Horizon — Summer Sale Video</div>
+        <div class="wl-set">New Sales Ad Set</div>
+        <div class="wl-stat">
+          <span class="wl-chip">$1,543 conv. value</span>
+          <span class="wl-chip">1 purchase</span>
+          <span class="wl-chip">$566.52 CPR</span>
+          <span class="wl-chip" style="background:rgba(255,77,109,.1); color:var(--red)">Reach −15.7%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CREATIVES -->
+  <section id="creatives">
+    <div class="section-label">Ad-Level Breakdown</div>
+    <h2>Creative Performance</h2>
+
+    <div class="filter-tabs reveal" style="margin-bottom:20px">
+      <button class="filter-tab active" onclick="filterTable('all')">All Ads</button>
+      <button class="filter-tab" onclick="filterTable('purchase')">Has Purchases</button>
+      <button class="filter-tab" onclick="filterTable('top')">Top by Reach</button>
+    </div>
+
+    <div class="table-wrap reveal" id="ad-table-wrap">
+      <table id="ad-table">
+        <thead>
+          <tr>
+            <th>Ad Name</th>
+            <th>Ad Set</th>
+            <th>Reach</th>
+            <th>Impressions</th>
+            <th>Spend (AUD)</th>
+            <th>Link Clicks</th>
+            <th>CPM</th>
+            <th>Purchases</th>
+            <th>Cost/Purchase</th>
+            <th>Conv. Value</th>
+            <th>Trend</th>
+          </tr>
+        </thead>
+        <tbody id="ad-table-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PLACEMENTS -->
+  <section id="placements">
+    <div class="section-label">Placement Breakdown</div>
+    <h2>Where Your Ads Showed</h2>
+
+    <div class="chart-grid reveal">
+      <div class="chart-box">
+        <div class="chart-title">Spend by Placement</div>
+        <canvas id="placementSpendChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Link Clicks by Placement</div>
+        <canvas id="placementClickChart"></canvas>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:0">Top Placements by Reach</div>
+    <div class="placement-list reveal" id="placement-bars"></div>
+
+    <!-- PLATFORM SPLIT -->
+    <div class="section-label">Platform Split</div>
+    <h2>Facebook vs Instagram</h2>
+    <div class="platform-split reveal">
+      <div class="platform-card">
+        <div class="plat-header">
+          <div class="plat-icon fb">📘</div>
+          <div>
+            <div class="plat-name">Facebook</div>
+            <div style="font-size:11px; color:var(--muted)">Feed · Reels · Stories · Marketplace</div>
+          </div>
+        </div>
+        <div class="plat-metrics">
+          <div class="plat-metric">
+            <div class="plat-metric-label">Est. Spend</div>
+            <div class="plat-metric-val" style="color:var(--solar)">~$1,680</div>
+          </div>
+          <div class="plat-metric">
+            <div class="plat-metric-label">Top Placement</div>
+            <div class="plat-metric-val" style="color:var(--blue); font-size:14px">Feed</div>
+          </div>
+          <div class="plat-metric">
+            <div class="plat-metric-label">Purchases</div>
+            <div class="plat-metric-val" style="color:var(--green)">7</div>
+          </div>
+          <div class="plat-metric">
+            <div class="plat-metric-label">Conv. Value</div>
+            <div class="plat-metric-val" style="color:var(--green)">~$9,700</div>
+          </div>
+        </div>
+      </div>
+      <div class="platform-card">
+        <div class="plat-header">
+          <div class="plat-icon ig">📸</div>
+          <div>
+            <div class="plat-name">Instagram</div>
+            <div style="font-size:11px; color:var(--muted)">Feed · Reels · Stories</div>
+          </div>
+        </div>
+        <div class="plat-metrics">
+          <div class="plat-metric">
+            <div class="plat-metric-label">Est. Spend</div>
+            <div class="plat-metric-val" style="color:var(--solar)">~$620</div>
+          </div>
+          <div class="plat-metric">
+            <div class="plat-metric-label">Top Placement</div>
+            <div class="plat-metric-val" style="color:var(--blue); font-size:14px">Reels</div>
+          </div>
+          <div class="plat-metric">
+            <div class="plat-metric-label">Purchases</div>
+            <div class="plat-metric-val" style="color:var(--green)">2</div>
+          </div>
+          <div class="plat-metric">
+            <div class="plat-metric-label">Conv. Value</div>
+            <div class="plat-metric-val" style="color:var(--green)">~$2,700</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AD SETS -->
+  <section id="adsets">
+    <div class="section-label">Ad Set Overview</div>
+    <h2>Ad Set Performance</h2>
+    <div class="ad-set-grid reveal" id="adset-grid"></div>
+
+    <!-- RADAR -->
+    <div class="radar-wrap reveal">
+      <div class="chart-title">Ad Set Health Radar — Reach, Clicks, Spend, Purchases, Conv. Value</div>
+      <canvas id="radarChart" style="max-height:380px"></canvas>
+    </div>
+  </section>
+
+  <!-- RECOMMENDATIONS -->
+  <section id="recommendations">
+    <div class="section-label">Strategic Recommendations</div>
+    <h2>Action Plan for Next Week</h2>
+
+    <div class="reco-list reveal">
+      <div class="reco-item">
+        <div class="reco-num">01</div>
+        <div class="reco-body">
+          <h3>Scale "Pre Black Friday / Summer Sale" creative</h3>
+          <p>This ad generated <strong>$3,086 in conv. value</strong> at just <strong>$13.54 cost/purchase</strong> — the most efficient result this week. Allocate 20–30% more budget to this creative and test a duplicate with a new thumbnail or headline variant.</p>
+        </div>
+      </div>
+      <div class="reco-item">
+        <div class="reco-num">02</div>
+        <div class="reco-body">
+          <h3>Pause or restructure "Horizon Summer Sale Video"</h3>
+          <p>Reach dropped <strong>−15.7%</strong> while cost-per-purchase hit <strong>$566.52</strong>. The creative is fatiguing. Either refresh the video or pause it to reallocate the $566 spend to better-performing ads.</p>
+        </div>
+      </div>
+      <div class="reco-item">
+        <div class="reco-num">03</div>
+        <div class="reco-body">
+          <h3>Expand "Horizon Ad 4" — strong early momentum</h3>
+          <p>This new ad went from near-zero to <strong>9,274 impressions</strong> with a $242 spend and <strong>$2,273 conv. value</strong>. It's showing CPM efficiency — scale budget gradually and monitor ROAS weekly.</p>
+        </div>
+      </div>
+      <div class="reco-item">
+        <div class="reco-num">04</div>
+        <div class="reco-body">
+          <h3>Invest more in Facebook Feed + Facebook Reels placements</h3>
+          <p>Feed delivered the highest purchase volume and conversion value. Reels on Facebook showed strong CTR uplift. Shift Audience Network spend (~$37) into these two placements and test incremental budget.</p>
+        </div>
+      </div>
+      <div class="reco-item">
+        <div class="reco-num">05</div>
+        <div class="reco-body">
+          <h3>Watch rising frequency (3.13x)</h3>
+          <p>Frequency is up 7.3% week-on-week. Audiences seeing ads 3+ times per week risk creative fatigue. Refresh at least 2 ad creatives before next cycle and consider expanding saved audience targeting to reduce overlap.</p>
+        </div>
+      </div>
+      <div class="reco-item">
+        <div class="reco-num">06</div>
+        <div class="reco-body">
+          <h3>ArmorEye new vertical placements look promising</h3>
+          <p>The new "Armor Eye – Vertical" ad set delivered <strong>1,770 impressions</strong> on debut with a CPM of $34.95 — competitive for the niche. Allocate test budget to Instagram Stories where vertical formats perform best.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEY INSIGHTS -->
+    <div class="section-label">Summary Insights</div>
+    <h2>What the Data Says</h2>
+    <div class="insight-grid reveal">
+      <div class="insight-card">
+        <div class="insight-icon">📈</div>
+        <h3>Reach & Impressions Growing</h3>
+        <p>Reach grew <strong>+9.7%</strong> and impressions <strong>+17.7%</strong> on slightly lower spend (−3.7%). This means your CPM improved — you're getting <strong>more eyeballs for less cost</strong>.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🎯</div>
+        <h3>9 Purchases, $12,573 Value</h3>
+        <p>Despite 1 fewer purchase than last week, <strong>conversion value grew +4.4%</strong> — indicating higher-ticket purchases. Average order value is trending up at ~<strong>$1,397 per purchase</strong>.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">💡</div>
+        <h3>New Sales Ad Set Dominates</h3>
+        <p>The New Sales Ad Set drove <strong>the majority of link clicks and all 5 key purchase events</strong>. The New Leads Ad Set contributed 2 purchases via ArmorEye Facebook Stories — <strong>$1,234 CPV</strong>.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📱</div>
+        <h3>Facebook Outperforms Instagram</h3>
+        <p>Facebook placements (Feed + Reels) drove <strong>~72% of spend</strong> and the bulk of conversions. Instagram Reels showed declining CTR this week — <strong>consider fresh creative for IG</strong> next cycle.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">⚡</div>
+        <h3>CPM Down 18% — Efficiency Win</h3>
+        <p>CPM dropped from $24.72 → $20.24, an <strong>18% efficiency improvement</strong>. This could reflect improved auction position or audience expansion. Monitor as budgets scale.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🔔</div>
+        <h3>Audience Network: Low ROI</h3>
+        <p>Audience Network (Native/Rewarded Video) accounts for ~$37 spend with <strong>0 recorded purchases</strong> and high CPM. Consider pausing or reducing allocation here to reinvest in owned placements.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Leer Solar Cameras — Meta Ads Weekly Report &nbsp;·&nbsp; Generated May 7, 2026<br>
+    Reporting period: Apr 30 – May 6, 2026 &nbsp;·&nbsp; Data source: Meta Ads Manager exports<br>
+    All amounts in AUD &nbsp;·&nbsp; Comparison period: Apr 23 – Apr 29, 2026</p>
+  </footer>
+</div>
+
+<script>
+// ─── CURSOR ───
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; });
+(function animRing() {
+  rx += (mx - rx) * 0.1; ry += (my - ry) * 0.1;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+})();
+
+// ─── PARTICLES ───
+(function() {
+  const cvs = document.getElementById('particles');
+  const ctx = cvs.getContext('2d');
+  cvs.width = window.innerWidth; cvs.height = window.innerHeight;
+  window.addEventListener('resize', () => { cvs.width = window.innerWidth; cvs.height = window.innerHeight; });
+  const pts = Array.from({length: 80}, () => ({
+    x: Math.random() * cvs.width, y: Math.random() * cvs.height,
+    r: Math.random() * 1.5 + .3,
+    vx: (Math.random() - .5) * .4, vy: (Math.random() - .5) * .4,
+    alpha: Math.random() * .6 + .2
+  }));
+  let pmx = 0, pmy = 0;
+  document.addEventListener('mousemove', e => { pmx = e.clientX; pmy = e.clientY; });
+  function draw() {
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    pts.forEach(p => {
+      const dx = pmx - p.x, dy = pmy - p.y, dist = Math.sqrt(dx*dx+dy*dy);
+      if (dist < 120) { p.x -= dx * .01; p.y -= dy * .01; }
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = cvs.width; if (p.x > cvs.width) p.x = 0;
+      if (p.y < 0) p.y = cvs.height; if (p.y > cvs.height) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,166,35,${p.alpha})`;
+      ctx.fill();
+    });
+    // draw connections
+    pts.forEach((a, i) => pts.slice(i+1).forEach(b => {
+      const d = Math.hypot(a.x-b.x, a.y-b.y);
+      if (d < 100) {
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = `rgba(245,166,35,${.12 * (1 - d/100)})`;
+        ctx.lineWidth = .5; ctx.stroke();
+      }
+    }));
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ─── 3D TILT ───
+document.querySelectorAll('[data-tilt]').forEach(el => {
+  el.addEventListener('mousemove', e => {
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - .5;
+    const y = (e.clientY - r.top) / r.height - .5;
+    el.style.transform = `perspective(600px) rotateY(${x*14}deg) rotateX(${-y*14}deg) translateZ(8px)`;
+  });
+  el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+});
+
+// ─── SCROLL REVEAL ───
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ─── DATA ───
+const adData = [
+  { name: 'Pre Black Friday — Summer Sale', adset: 'New Sales Ad Set', reach: 11643, impressions: 22808, spend: 360.14, clicks: 429, cpm: 15.79, purchases: 3, cppurchase: 120.05, convVal: 5053, reachChange: 198 },
+  { name: 'Horizon Ad 4', adset: 'Horizon', reach: 3928, impressions: 9274, spend: 242.44, clicks: 56, cpm: 26.14, purchases: 2, cppurchase: 121.22, convVal: 2273.6, reachChange: 1045 },
+  { name: 'New Sales ArmorEye', adset: 'New Leads Ad Set', reach: 6664, impressions: 20962, spend: 246.16, clicks: 141, cpm: 11.74, purchases: 2, cppurchase: 123.08, convVal: 2468.8, reachChange: 39.3 },
+  { name: 'Horizon – Summer Sale Video', adset: 'New Sales Ad Set', reach: 17848, impressions: 35486, spend: 566.52, clicks: 703, cpm: 15.96, purchases: 1, cppurchase: 566.52, convVal: 1543, reachChange: -15.7 },
+  { name: 'Square Ad 3', adset: 'Square', reach: 4470, impressions: 7385, spend: 260.42, clicks: 105, cpm: 35.26, purchases: 1, cppurchase: 260.42, convVal: 1234.4, reachChange: 16.9 },
+  { name: 'Armor Eye Ad 4', adset: 'Armor Eye', reach: 2465, impressions: 5438, spend: 211.23, clicks: 32, cpm: 38.84, purchases: 0, cppurchase: null, convVal: 0, reachChange: 311.5 },
+  { name: 'New Sales Horizon', adset: 'New Leads Ad Set', reach: 786, impressions: 1746, spend: 25.95, clicks: 10, cpm: 14.86, purchases: 0, cppurchase: null, convVal: 0, reachChange: 1329 },
+  { name: 'Square Ad 2', adset: 'Square', reach: 829, impressions: 1718, spend: 73.65, clicks: 23, cpm: 42.87, purchases: 0, cppurchase: null, convVal: 0, reachChange: 172.7 },
+  { name: 'Armor Eye Ad 3', adset: 'Armor Eye', reach: 996, impressions: 1729, spend: 61.98, clicks: 7, cpm: 35.85, purchases: 0, cppurchase: null, convVal: 0, reachChange: 308.2 },
+  { name: 'Armor Eye Vertical Ad 1', adset: 'Armor Eye – Vertical', reach: 1277, impressions: 1770, spend: 61.86, clicks: 12, cpm: 34.95, purchases: 0, cppurchase: null, convVal: 0, reachChange: null },
+];
+
+// ─── AD TABLE ───
+function renderTable(filter) {
+  let rows = adData;
+  if (filter === 'purchase') rows = rows.filter(r => r.purchases > 0);
+  if (filter === 'top') rows = [...rows].sort((a,b) => b.reach - a.reach).slice(0, 5);
+  const tbody = document.getElementById('ad-table-body');
+  tbody.innerHTML = rows.map(r => {
+    const rc = r.reachChange;
+    const rcBadge = rc === null ? `<span class="badge badge-blue">NEW</span>` :
+      rc > 0 ? `<span class="badge badge-green">▲ ${rc.toFixed(0)}%</span>` :
+      `<span class="badge badge-red">▼ ${Math.abs(rc).toFixed(0)}%</span>`;
+    const purch = r.purchases > 0 ? `<span style="color:var(--green); font-weight:700">${r.purchases}</span>` : `<span class="muted">—</span>`;
+    const cpp = r.cppurchase ? `$${r.cppurchase.toFixed(2)}` : '—';
+    const cv = r.convVal > 0 ? `<span style="color:var(--green)">$${r.convVal.toLocaleString()}</span>` : '<span class="muted">—</span>';
+    return `<tr>
+      <td style="max-width:240px;white-space:normal;min-width:180px;font-size:11px">${r.name}</td>
+      <td class="muted">${r.adset}</td>
+      <td>${r.reach.toLocaleString()}</td>
+      <td>${r.impressions.toLocaleString()}</td>
+      <td>$${r.spend.toFixed(2)}</td>
+      <td>${r.clicks}</td>
+      <td>$${r.cpm.toFixed(2)}</td>
+      <td>${purch}</td>
+      <td class="muted">${cpp}</td>
+      <td>${cv}</td>
+      <td>${rcBadge}</td>
+    </tr>`;
+  }).join('');
+}
+renderTable('all');
+function filterTable(f) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  renderTable(f);
+}
+
+// ─── AD SET CARDS ───
+const adsets = [
+  { name: 'New Sales Ad Set', spend: 961.53, reach: 31308, clicks: 1155, purchases: 4, convVal: 9598, budget: 140 },
+  { name: 'New Leads Ad Set', spend: 246.16, reach: 6664, clicks: 141, purchases: 2, convVal: 2468.8, budget: 40 },
+  { name: 'Armor Eye', spend: 333.89, reach: 7344, clicks: 51, purchases: 0, convVal: 0, budget: 50 },
+  { name: 'Horizon', spend: 333.97, reach: 4986, clicks: 65, purchases: 2, convVal: 2273.6, budget: 50 },
+  { name: 'Square', spend: 338.08, reach: 6159, clicks: 129, purchases: 1, convVal: 1234.4, budget: 50 },
+  { name: 'Armor Eye – Vertical', spend: 95.68, reach: 2039, clicks: 25, purchases: 0, convVal: 0, budget: 50 },
+];
+const grid = document.getElementById('adset-grid');
+adsets.forEach(a => {
+  const roas = a.spend > 0 ? (a.convVal / a.spend).toFixed(2) : '—';
+  grid.innerHTML += `
+    <div class="ad-set-card">
+      <div class="ad-set-name">${a.name}</div>
+      <div class="ad-set-stat"><span class="ad-set-stat-label">Daily Budget</span><span class="ad-set-stat-val" style="color:var(--solar)">$${a.budget} AUD</span></div>
+      <div class="ad-set-stat"><span class="ad-set-stat-label">Spend</span><span class="ad-set-stat-val">$${a.spend.toFixed(0)}</span></div>
+      <div class="ad-set-stat"><span class="ad-set-stat-label">Reach</span><span class="ad-set-stat-val">${a.reach.toLocaleString()}</span></div>
+      <div class="ad-set-stat"><span class="ad-set-stat-label">Link Clicks</span><span class="ad-set-stat-val" style="color:var(--purple)">${a.clicks}</span></div>
+      <div class="ad-set-stat"><span class="ad-set-stat-label">Purchases</span><span class="ad-set-stat-val" style="color:var(--green)">${a.purchases}</span></div>
+      <div class="ad-set-stat"><span class="ad-set-stat-label">Conv. Value</span><span class="ad-set-stat-val" style="color:var(--green)">$${a.convVal.toLocaleString()}</span></div>
+      <div class="ad-set-stat"><span class="ad-set-stat-label">ROAS</span><span class="ad-set-stat-val" style="color:${roas > 3 ? 'var(--green)' : roas === '—' ? 'var(--muted)' : 'var(--solar)'}">${roas}x</span></div>
+    </div>`;
+});
+
+// ─── PLACEMENT BARS ───
+const placements = [
+  { name: 'Facebook Feed', spend: 1183, clicks: 678, reach: 28000, color: '#4da6ff' },
+  { name: 'Facebook Reels', spend: 398, clicks: 312, reach: 12800, color: '#b67fff' },
+  { name: 'Instagram Reels', spend: 195, clicks: 89, reach: 5200, color: '#ff6db6' },
+  { name: 'Facebook Stories', spend: 85, clicks: 54, reach: 1800, color: '#f5a623' },
+  { name: 'Instagram Stories', spend: 48, clicks: 38, reach: 1400, color: '#ff9466' },
+  { name: 'Marketplace', spend: 75, clicks: 22, reach: 4100, color: '#3dffa0' },
+  { name: 'Audience Network', spend: 37, clicks: 284, reach: 180, color: '#6b7694' },
+  { name: 'In-stream Reels', spend: 55, clicks: 62, reach: 2200, color: '#ffcf72' },
+];
+const maxReach = Math.max(...placements.map(p => p.reach));
+const pBars = document.getElementById('placement-bars');
+placements.forEach(p => {
+  const pct = (p.reach / maxReach * 100).toFixed(1);
+  pBars.innerHTML += `
+    <div class="placement-row">
+      <div class="placement-name">${p.name}</div>
+      <div class="placement-bar-bg"><div class="placement-bar-fill" style="width:${pct}%; background:${p.color}"></div></div>
+      <div class="placement-val">${(p.reach/1000).toFixed(1)}K</div>
+    </div>`;
+});
+
+// ─── CHART.JS SETUP ───
+Chart.defaults.color = '#6b7694';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+Chart.defaults.font.family = "'Space Mono', monospace";
+Chart.defaults.font.size = 11;
+
+// Spend vs ConvValue
+new Chart(document.getElementById('spendChart'), {
+  type: 'bar',
+  data: {
+    labels: ['New Sales', 'New Leads', 'Armor Eye', 'Horizon', 'Square', 'AE Vertical'],
+    datasets: [
+      { label: 'Spend (AUD)', data: [961.53, 246.16, 333.89, 333.97, 338.08, 95.68], backgroundColor: 'rgba(245,166,35,0.7)', borderRadius: 6 },
+      { label: 'Conv. Value (AUD)', data: [9598, 2468.8, 0, 2273.6, 1234.4, 0], backgroundColor: 'rgba(61,255,160,0.6)', borderRadius: 6 },
+    ]
+  },
+  options: { responsive: true, plugins: { legend: { labels: { color: '#e8ecf4', usePointStyle: true } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' } }, y: { grid: { color: 'rgba(255,255,255,0.04)' } } } }
+});
+
+// CTR chart
+new Chart(document.getElementById('ctrChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['New Sales Ad Set', 'New Leads', 'Armor Eye', 'Horizon', 'Square', 'AE Vertical'],
+    datasets: [{ data: [1.49, 1.74, 0.93, 1.38, 1.27, 1.41], backgroundColor: ['#f5a623','#3dffa0','#ff4d6d','#4da6ff','#b67fff','#ffcf72'], borderWidth: 0, hoverOffset: 10 }]
+  },
+  options: { responsive: true, cutout: '65%', plugins: { legend: { position: 'right', labels: { color: '#e8ecf4', usePointStyle: true, boxWidth: 10, font: { size: 10 } } } } }
+});
+
+// CPM chart
+new Chart(document.getElementById('cpmChart'), {
+  type: 'bar',
+  data: {
+    labels: ['New Sales', 'New Leads', 'Armor Eye', 'Horizon', 'Square', 'AE Vertical'],
+    datasets: [
+      { label: 'CPM This Week', data: [15.96, 11.74, 38.84, 26.14, 35.26, 34.95], backgroundColor: 'rgba(77,166,255,0.7)', borderRadius: 6 },
+      { label: 'CPM Last Week', data: [23.36, 21.55, 40.27, 36.14, 40.31, null], backgroundColor: 'rgba(77,166,255,0.2)', borderRadius: 6 },
+    ]
+  },
+  options: { indexAxis: 'y', responsive: true, plugins: { legend: { labels: { color: '#e8ecf4', usePointStyle: true } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' } }, y: { grid: { color: 'rgba(255,255,255,0.04)' } } } }
+});
+
+// Placement spend pie
+new Chart(document.getElementById('placementSpendChart'), {
+  type: 'doughnut',
+  data: {
+    labels: placements.map(p => p.name),
+    datasets: [{ data: placements.map(p => p.spend), backgroundColor: placements.map(p => p.color), borderWidth: 0, hoverOffset: 12 }]
+  },
+  options: { responsive: true, cutout: '60%', plugins: { legend: { position: 'right', labels: { color: '#e8ecf4', usePointStyle: true, boxWidth: 10, font: { size: 10 } } } } }
+});
+
+// Placement clicks bar
+new Chart(document.getElementById('placementClickChart'), {
+  type: 'bar',
+  data: {
+    labels: placements.map(p => p.name),
+    datasets: [{ label: 'Link Clicks', data: placements.map(p => p.clicks), backgroundColor: placements.map(p => p.color + 'bb'), borderRadius: 6 }]
+  },
+  options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { maxRotation: 40, font: { size: 9 } } }, y: { grid: { color: 'rgba(255,255,255,0.04)' } } } }
+});
+
+// Radar
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['Reach (K)', 'Link Clicks', 'Spend ($00s)', 'Purchases', 'Conv. Value ($00s)'],
+    datasets: adsets.map((a, i) => ({
+      label: a.name,
+      data: [a.reach/1000, a.clicks/10, a.spend/100, a.purchases*2, a.convVal/1000],
+      borderColor: ['#f5a623','#3dffa0','#ff4d6d','#4da6ff','#b67fff','#ffcf72'][i],
+      backgroundColor: ['rgba(245,166,35,.08)','rgba(61,255,160,.08)','rgba(255,77,109,.08)','rgba(77,166,255,.08)','rgba(182,127,255,.08)','rgba(255,207,114,.08)'][i],
+      pointBackgroundColor: ['#f5a623','#3dffa0','#ff4d6d','#4da6ff','#b67fff','#ffcf72'][i],
+      borderWidth: 1.5, pointRadius: 4,
+    }))
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#e8ecf4', usePointStyle: true, font: { size: 10 } } } },
+    scales: {
+      r: {
+        grid: { color: 'rgba(255,255,255,0.07)' },
+        angleLines: { color: 'rgba(255,255,255,0.07)' },
+        pointLabels: { color: '#e8ecf4', font: { size: 11 } },
+        ticks: { display: false }
+      }
+    }
+  }
+});
+
+// ─── NAV ACTIVE ───
+const navLinks = document.querySelectorAll('nav a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  document.querySelectorAll('section, header').forEach(sec => {
+    if (window.scrollY >= sec.offsetTop - 120) current = sec.id;
+  });
+  navLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + current); });
+});
+</script>
+</body>
+</html>
